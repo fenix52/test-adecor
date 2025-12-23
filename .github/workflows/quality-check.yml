@@ -1,0 +1,35 @@
+name: Quality Check
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate HTML
+        run: |
+          npm install -g html-validator-cli
+          html-validator public/index.html || true
+
+      - name: Check CSS
+        run: |
+          npm install -g stylelint stylelint-config-standard
+          stylelint "public/**/*.css" || true
+
+      - name: Analyze bundle size
+        run: |
+          du -sh public/* | sort -h
+          echo "Total size:"
+          du -sh public
